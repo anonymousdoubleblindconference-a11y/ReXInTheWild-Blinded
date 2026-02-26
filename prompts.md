@@ -1,3 +1,10 @@
+# Prompt Collection
+
+---
+
+## 1. Caption Filtering
+
+```text
 # Caption Filtering
 prompt = (
         "Below is a short image caption. Does it describe an image that could "
@@ -7,20 +14,34 @@ prompt = (
         f"Caption: {caption}\n\n"
         "Answer YES or NO."
     )
+```
 
+---
+
+## 2. Image Filtering
+
+```text
 # Image Filtering
 Image content filter
 prompt = (
         "For the given image and caption, decide if this image could be relevant for assessing some medical condition"
         " in an everyday, NON-HOSPITAL context, such as:\n"
-        "1. Facial abnormalities\n2. Dermatological conditions\n3. Postural or musculoskeletal conditions.\n\n"
+        "1. Facial abnormalities\n"
+        "2. Dermatological conditions\n"
+        "3. Postural or musculoskeletal conditions.\n\n"
         "Labels:\n- NO: Does not show a person, is a drawing/simulation, person not reasonably visible, or setup is clearly clinical/imaging only.\n"
         "- YES: Person or a body part is clearly visible in detail, could plausibly be in a normal setting, some medical content OK if ordinary context possible (e.g. showing wheelchairs or an aide helping someone stretch).\n"
         "- WITH CROPS: Collages or group images with at least one crop-able qualifying area.\n\n"
         f"Caption: {caption}\n\n"
         "Choose one: YES / NO / WITH CROPS. Just return one of those (don't explain)."
     )
+```
 
+---
+
+## 3. Question generator
+
+```text
 # Question generator
 user_message = {
         "role": "user",
@@ -33,9 +54,12 @@ user_message = {
                     "Each question should offer 3-5 answer choices and the correct answer should be clearly marked. "
                     "If the image does not show a patient in a pose with medical implications or if it focuses primarily on a skin condition, return an empty list. "
                     "If you cannot properly read the image, return an empty list. "
-                    "All questions should require analysis of the specific image, not just theoretical medical knowledge about how conditions usually present or how tests are typically performed."
-                    "The questions should capture any medical topics covered by the caption but can also reference other details of the image. However the question should not directly mention the existence of a caption, as the test-taker will not see the caption."
-                    "The questions should be clear and concise, avoiding unnecessary details or leading phrasing. For example, you should ask 'what jaw abnormality is present' rather than 'based on the forward projection of the jaw, what abnormality is present?'."
+                    "All questions should require analysis of the specific image, not just theoretical medical knowledge about "
+                    "how conditions usually present or how tests are typically performed."
+                    "The questions should capture any medical topics covered by the caption but can also reference other details of the image. "
+                    "However the question should not directly mention the existence of a caption, as the test-taker will not see the caption."
+                    "The questions should be clear and concise, avoiding unnecessary details or leading phrasing. "
+                    "For example, you should ask 'what jaw abnormality is present' rather than 'based on the forward projection of the jaw, what abnormality is present?'."
                     "If the image contains multiple subfigures, specify which subfigure each question is about. "
                     "Output your questions as a JSON list following this format:\n\n"
                     "[{\"question\": \"...\", \"choices\": [\"...\"], \"answer\": \"...\"}, ...]\n\n"
@@ -48,17 +72,25 @@ user_message = {
             }
         ]
     }
+```
 
+---
+
+## 4. Question editor
+
+```text
 # Question editor
 prompt = (
         "You are editing a multiple-choice medical question to make it more concise and direct.\n\n"
-        "Remove leading phrases that give away unnecessary information, e.g. telling the reader about the image content instead of making them interpret the image themselves."
+        "Remove leading phrases that give away unnecessary information, e.g. telling the reader about the image content "
+        "instead of making them interpret the image themselves."
         "Avoid including details that clearly point towards the correct answer or rule out the distractors."
         "Leave only the core information required to understand and answer the question."
         "For example:\n"
         "BAD: 'In subfigure b, the prone position with the knee flexed primarily increases stretch on which muscle?'\n"
         "GOOD: 'In subfigure b, the leg position primarily increases stretch on which muscle?'\n\n"
-        "BAD: 'Based on the visible fullness just inferior and anterior to the right ear lobule over the angle of the mandible, which structure is most likely involved?'\n"
+        "BAD: 'Based on the visible fullness just inferior and anterior to the right ear lobule over the angle of the mandible, "
+        "which structure is most likely involved?'\n"
         "GOOD: 'Which structure is likely involved in the ear and mandible findings?'\n\n"
         "Keep the question clear and medically accurate. If the question references a specific subfigure, keep that reference.\n\n"
         "Caption: {caption}\n\n"
@@ -72,7 +104,13 @@ prompt = (
         choices_text=choices_text,
         answer=answer
     )
+```
 
+---
+
+## 5. Distractor editor
+
+```text
 # Distractor editor
 prompt = (
         "You are editing the answer choices for a multiple-choice medical question to maximize difficulty and make all choices plausible.\n"
@@ -99,18 +137,27 @@ prompt = (
         choices_text=choices_text,
         answer=answer
     )
+```
 
+---
+
+## 6. Scorer
+
+```text
 # Scorer
 prompt = (
         "You are scoring a multiple-choice medical question on 4 dimensions (each 1-5):\n\n"
         "1. CLARITY (1-5): Is the correct answer clearly the only acceptable option? Is the question clear and easy to understand for a clinician who can see the image but not the caption? \n"
         "For example, if a question is about one hand but both hands are seen in the image, then it should be clear which hand is being asked about. \n\n"
-        "Picking the right answer should not require info that cannot be reasonably inferred from the image alone. Give low scores to questions that are ambiguous or open-ended.\n\n"
-        "2. MEDICAL RELEVANCE (1-5): How relevant is the question to the primary medical content of the image? For example, if the image primarily shows someone with a large cut and incidental hyperpigmentation, "
+        "Picking the right answer should not require info that cannot be reasonably inferred from the image alone. "
+        "Give low scores to questions that are ambiguous or open-ended.\n\n"
+        "2. MEDICAL RELEVANCE (1-5): How relevant is the question to the primary medical content of the image? "
+        "For example, if the image primarily shows someone with a large cut and incidental hyperpigmentation, "
         "a question about the cut would be highly relevant (5) and a question about the hyperpigmentation would be less relevant (1-2).\n\n"
         "3. MEDICAL DIFFICULTY (1-5): Does it require recognizing medical concepts or reasoning about non-obvious medical implications? "
         "Give high scores if picking the correct answer from the given options requires medical knowledge and reasoning.\n\n"
-        "4. VISUAL DIFFICULTY (1-5): Does the question require visual reasoning? For example, does it require the reader to consider directions like left, right, dorsal, palmar, etc.? "
+        "4. VISUAL DIFFICULTY (1-5): Does the question require visual reasoning? For example, does it require the reader to consider "
+        "directions like left, right, dorsal, palmar, etc.? "
         "Does it require counting or reasoning about fine-grained details, hidden objects or blurry areas? Does it require careful visual analysis?"
         " Give low scores to questions that can be answered without looking at the image, just by using abstract knowledge.\n\n"
         "Caption: {caption}\n\n"
@@ -125,7 +172,13 @@ prompt = (
         choices_text=choices_text,
         answer=answer
     )
+```
 
+---
+
+## 7. Question Tagger
+
+```text
 # Question Tagger
 
 tag_options = [
@@ -141,7 +194,8 @@ tag_options = [
     sys_message = {
                 "role": "system",
                 "content": (
-                    "You are a helpful medical expert. Your task is to categorize the following question, considering its associated image, into exactly one of the given medical specialties/tags. "
+                    "You are a helpful medical expert. Your task is to categorize the following question, "
+                    "considering its associated image, into exactly one of the given medical specialties/tags. "
                     "Pick the single best-fitting tag for the question from these options:\n"
                     "If you cannot read the question or image, return 'ERROR'.\n"
                     + "\n".join(f"- {tag}" for tag in tag_options) +
@@ -150,12 +204,20 @@ tag_options = [
                 ),
             }
             user_content = [{"type": "text", "text": f"Question: \"{q.strip()}\""}]
+```
 
+---
+
+## 8. Generating answers
+
+```text
 # Generating answers
 
 SYSTEM_PROMPT = """You are an expert clinician."""
 USER_PROMPT = (
     "Given the following medical image and a multiple-choice question, select the single best answer from the choices.\n"
-    "ONLY output your FINAL answer, which must be placed inside curly brackets, e.g. {A}. Provide NO extra words, reasoning or explanation outside the curly brackets.\n"
+    "ONLY output your FINAL answer, which must be placed inside curly brackets, e.g. {A}. "
+    "Provide NO extra words, reasoning or explanation outside the curly brackets.\n"
     "When asked about left/right, answer from the patient's viewpoint unless otherwise stated.\n"
 )
+```
